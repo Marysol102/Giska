@@ -299,7 +299,7 @@ const WORDS = [
   {
     id:"ringulreid", word:"RINGULREIÐ", lang:"Islandés",
     meaning:"Caos",
-    hint:"Literalmente algo así como "confusión giratoria". El islandés tiene palabras muy visuales para conceptos abstractos",
+    hint:"Literalmente algo así como 'confusión giratoria'. El islandés tiene palabras muy visuales",
     clue:"Desorden total, situación en que nada sigue ninguna regla o patrón",
     accept:["caos","desorden","confusión","confusion","anarquia","anarquía","caotismo","revuelo"],
     a:{1:"D",2:"N",3:"D",4:"S",5:"N",6:"S",7:"N",8:"N",9:"N",10:"N",11:"N",12:"N",13:"N",14:"S",15:"N",16:"D",17:"N",18:"D",19:"N",20:"N",21:"D",22:"D",23:"S",24:"S",25:"N",26:"S",27:"N",28:"S",29:"N",30:"D",31:"S",32:"N",33:"N",34:"D",35:"S",36:"D",37:"D",38:"N",39:"N",40:"N",41:"N",42:"N",43:"N",44:"N",45:"N",46:"N",47:"N",48:"N",49:"N",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"N",57:"N",58:"N",59:"D",60:"N"}
@@ -323,7 +323,7 @@ const WORDS = [
   {
     id:"aita", word:"AITA", lang:"Finlandés",
     meaning:"Cerca",
-    hint:"En finlandés también significa "valla". Los finlandeses valoran mucho la privacidad y los límites entre propiedades",
+    hint:"En finlandés también significa 'valla'. Los finlandeses valoran mucho la privacidad y los límites entre propiedades",
     clue:"Una barrera física que delimita un terreno o separa dos zonas",
     accept:["cerca","valla","vallado","cercado","seto","fence","muro","tapia","barrera","delimitacion"],
     a:{1:"S",2:"N",3:"N",4:"N",5:"N",6:"N",7:"S",8:"S",9:"N",10:"S",11:"N",12:"N",13:"S",14:"N",15:"N",16:"S",17:"D",18:"N",19:"N",20:"S",21:"N",22:"S",23:"D",24:"N",25:"N",26:"S",27:"N",28:"S",29:"N",30:"D",31:"S",32:"N",33:"D",34:"N",35:"S",36:"N",37:"N",38:"N",39:"S",40:"N",41:"N",42:"S",43:"N",44:"N",45:"N",46:"N",47:"N",48:"N",49:"N",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"S",57:"S",58:"S",59:"D",60:"D"}
@@ -339,7 +339,7 @@ const WORDS = [
   {
     id:"lani", word:"LANI", lang:"Hawaiano",
     meaning:"Cielo",
-    hint:"En hawaiano también significa "cielo" en sentido espiritual, y aparece en muchos nombres propios",
+    hint:"En hawaiano también significa 'cielo' en sentido espiritual, y aparece en muchos nombres propios",
     clue:"El espacio que ves encima de tu cabeza cuando miras hacia arriba al aire libre",
     accept:["cielo","firmamento","sky","heaven","bóveda","atmosfera","atmósfera","espacio"],
     a:{1:"S",2:"N",3:"N",4:"D",5:"N",6:"S",7:"N",8:"N",9:"N",10:"S",11:"N",12:"N",13:"N",14:"S",15:"N",16:"S",17:"S",18:"D",19:"N",20:"N",21:"N",22:"S",23:"S",24:"S",25:"D",26:"S",27:"N",28:"S",29:"N",30:"N",31:"S",32:"N",33:"S",34:"N",35:"D",36:"N",37:"S",38:"N",39:"N",40:"N",41:"N",42:"S",43:"N",44:"N",45:"N",46:"N",47:"D",48:"D",49:"D",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"N",57:"N",58:"N",59:"S",60:"N"}
@@ -363,7 +363,7 @@ const WORDS = [
   {
     id:"loftslag", word:"LOFTSLAG", lang:"Islandés",
     meaning:"Clima",
-    hint:"Literalmente "condición del aire". Islandia tiene uno de los climas más variables e impredecibles del mundo",
+    hint:"Literalmente 'condición del aire'. Islandia tiene uno de los climas más variables e impredecibles del mundo",
     clue:"El patrón habitual de temperaturas, lluvia y viento de una región a lo largo del año",
     accept:["clima","tiempo","meteorologia","meteorología","atmosfera","atmósfera","climate","weather"],
     a:{1:"D",2:"N",3:"N",4:"S",5:"N",6:"S",7:"N",8:"N",9:"N",10:"N",11:"N",12:"N",13:"N",14:"S",15:"N",16:"D",17:"N",18:"N",19:"N",20:"N",21:"N",22:"S",23:"S",24:"S",25:"S",26:"S",27:"N",28:"S",29:"D",30:"D",31:"S",32:"N",33:"D",34:"D",35:"S",36:"D",37:"N",38:"N",39:"N",40:"N",41:"N",42:"S",43:"D",44:"N",45:"N",46:"N",47:"D",48:"N",49:"N",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"N",57:"N",58:"N",59:"S",60:"D"}
@@ -379,7 +379,7 @@ const WORDS = [
   {
     id:"pyrstotahti", word:"PYRSTÖTÄHTI", lang:"Finlandés",
     meaning:"Cometa",
-    hint:"Literalmente "estrella de cola". Visible a simple vista solo unas pocas veces por siglo",
+    hint:"Literalmente 'estrella de cola'. Visible a simple vista solo unas pocas veces por siglo",
     clue:"Un cuerpo celeste que orbita el sol y arrastra una larga cola luminosa de gas y polvo",
     accept:["cometa","comet","estrella","cola","cuerpo celeste","asteroide","meteoro"],
     a:{1:"S",2:"D",3:"N",4:"N",5:"N",6:"S",7:"N",8:"D",9:"N",10:"S",11:"N",12:"N",13:"N",14:"S",15:"S",16:"S",17:"S",18:"N",19:"N",20:"N",21:"N",22:"D",23:"S",24:"S",25:"N",26:"S",27:"N",28:"S",29:"N",30:"N",31:"S",32:"N",33:"D",34:"D",35:"S",36:"D",37:"S",38:"N",39:"N",40:"N",41:"N",42:"S",43:"N",44:"N",45:"N",46:"N",47:"N",48:"S",49:"D",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"S",57:"N",58:"N",59:"S",60:"D"}
@@ -454,7 +454,7 @@ const WORDS = [
   {
     id:"palaisipan", word:"PALAISIPAN", lang:"Tagalo",
     meaning:"Enigma",
-    hint:"En tagalo también se usa para acertijos y juegos de ingenio. Literalmente viene de "isip", que significa mente o pensamiento",
+    hint:"En tagalo también se usa para acertijos y juegos de ingenio. Literalmente viene de 'isip', que significa mente o pensamiento",
     clue:"Algo difícil de entender o explicar. Un misterio que desafía la razón",
     accept:["enigma","misterio","acertijo","incógnita","incognita","puzzle","rompecabezas","secreto","charada"],
     a:{1:"N",2:"N",3:"N",4:"S",5:"N",6:"N",7:"N",8:"N",9:"N",10:"N",11:"N",12:"N",13:"D",14:"N",15:"N",16:"N",17:"N",18:"N",19:"N",20:"N",21:"N",22:"D",23:"N",24:"N",25:"N",26:"S",27:"D",28:"S",29:"N",30:"D",31:"S",32:"N",33:"D",34:"N",35:"S",36:"N",37:"S",38:"N",39:"N",40:"N",41:"N",42:"N",43:"N",44:"N",45:"N",46:"N",47:"N",48:"N",49:"N",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"N",57:"N",58:"N",59:"D",60:"N"}
@@ -740,7 +740,7 @@ const WORDS = [
   {
     id:"begirada", word:"BEGIRADA", lang:"Vasco",
     meaning:"Mirada",
-    hint:"En euskera BEGI significa ojo. BEGIRADA es literalmente "lo que hace el ojo"",
+    hint:"En euskera BEGI significa ojo. BEGIRADA es literalmente 'lo que hace el ojo'",
     clue:"El acto de dirigir los ojos hacia algo o alguien con atención",
     accept:["mirada","vistazo","ojeada","ojo","vista","gaze","look","ojeo","contemplación","contemplacion"],
     a:{1:"N",2:"S",3:"D",4:"N",5:"N",6:"N",7:"N",8:"N",9:"N",10:"N",11:"N",12:"N",13:"N",14:"N",15:"N",16:"D",17:"N",18:"N",19:"N",20:"N",21:"S",22:"N",23:"N",24:"N",25:"N",26:"S",27:"D",28:"S",29:"S",30:"S",31:"S",32:"N",33:"D",34:"N",35:"S",36:"N",37:"S",38:"N",39:"N",40:"N",41:"N",42:"D",43:"N",44:"N",45:"N",46:"N",47:"N",48:"D",49:"D",50:"S",51:"S",52:"S",53:"S",54:"N",55:"N",56:"N",57:"N",58:"N",59:"D",60:"N"}
