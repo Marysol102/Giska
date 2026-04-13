@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // ============================================================
-// GOOGLE GEMINI API — Free tier: 1,500 requests/day
+// GROQ API — 100% Free: 30 req/min, 14,400 req/day
 // ============================================================
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = "gemini-2.5-flash";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+const GROQ_MODEL = "llama-3.1-8b-instant";
 
 // ============================================================
 // SMART CACHE — Semantic keyword matching for similar questions
@@ -23,7 +23,7 @@ const questionCache = new Map<string, CacheEntry[]>();
 
 // Daily AI call counter: key = date string (YYYY-MM-DD)
 const dailyCallCount = new Map<string, number>();
-const DAILY_LIMIT = 200; // Free safety margin (Gemini allows 1,500/day)
+const DAILY_LIMIT = 500; // Groq allows 14,400/day, 500 is a safe margin
 
 // Spanish stop words to ignore when extracting keywords
 const STOP_WORDS = new Set([
@@ -126,10 +126,10 @@ function incrementDailyCount(): void {
 }
 
 // ============================================================
-// GOOGLE GEMINI API CALL
+// GROQ API CALL (OpenAI-compatible)
 // ============================================================
 
-async function askGemini(
+async function askGroq(
   question: string,
   meaning: string,
   word: string,
@@ -152,43 +152,42 @@ Preguntas ya realizadas por el jugador:
 ${prevQsText}
 
 Reglas:
-1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
+1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde "no_sense"
 2. No reveles NUNCA la palabra secreta ni partes de ella
-3. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
-4. No anadas texto adicional fuera del JSON`;
+3. Responde SOLO en formato JSON exacto: { "answer": true, "explanation": "breve explicacion en espanol de maximo 15 palabras" }
+4. Si la pregunta no tiene sentido, responde: { "answer": "no_sense", "explanation": "No puedo responder a esa pregunta." }
+5. No anadas texto adicional fuera del JSON`;
 
   const userPrompt = `Pregunta del jugador: "${question}"`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const url = "https://api.groq.com/openai/v1/chat/completions";
 
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${GROQ_API_KEY}`,
+    },
     body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: `${systemPrompt}\n\n${userPrompt}` },
-          ],
-        },
+      model: GROQ_MODEL,
+      temperature: 0.1,
+      max_tokens: 100,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 100,
-        responseMimeType: "application/json",
-      },
+      response_format: { type: "json_object" },
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error("Gemini API error:", response.status, errText);
-    throw new Error(`Gemini API error ${response.status}: ${errText.slice(0, 200)}`);
+    console.error("Groq API error:", response.status, errText);
+    throw new Error(`Groq API error ${response.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = await response.json();
-  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const content = data?.choices?.[0]?.message?.content || "";
 
   let parsed: { answer: boolean | string; explanation: string };
   try {
@@ -248,12 +247,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if Gemini API key is configured
-    if (!GEMINI_API_KEY) {
+    // Check if Groq API key is configured
+    if (!GROQ_API_KEY) {
       return NextResponse.json(
         {
           answer: "no_sense",
-          explanation: "La IA no esta configurada todavia. El administrador necesita agregar la API key de Gemini.",
+          explanation: "La IA no esta configurada todavia. El administrador necesita agregar la API key de Groq.",
           noApiKey: true,
         },
         { status: 200 }
@@ -292,9 +291,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Cache miss — ask Gemini
+    // Cache miss — ask Groq
     console.log(`[AI CALL ${dailyCount + 1}/${DAILY_LIMIT}] "${question}" (keywords: [${keywords.join(", ")}])`);
-    const result = await askGemini(
+    const result = await askGroq(
       question,
       meaning,
       word,
