@@ -68,7 +68,7 @@ interface WordObj {
 // CONSTANTS
 // ============================================================
 
-const MAX_QUESTIONS = 15;
+const MAX_QUESTIONS = 20;
 const MAX_GUESSES = 5;
 const GAME_START = new Date(2025, 0, 1);
 
@@ -91,6 +91,7 @@ interface GameState {
   won: boolean;
   startTime: number;
   puzzleNumber: number;
+  randomMode?: boolean;
 }
 
 // ============================================================
@@ -145,8 +146,55 @@ export default function GiskaGame() {
   const [showResults, setShowResults] = useState(false);
   const [toast, setToast] = useState('');
 
+  // God Mode state
+  const [godMode, setGodMode] = useState(false);
+  const [godTab, setGodTab] = useState<'banco' | 'ia' | 'aleatorio'>('banco');
+  const [bankStats, setBankStats] = useState<Record<string, number>>({});
+  const [aiStats, setAiStats] = useState<Record<string, number>>({});
+  const [randomMode, setRandomMode] = useState(false);
+
   const historyRef = useRef<HTMLDivElement>(null);
   const guessInputRef = useRef<HTMLInputElement>(null);
+  const logoTapCount = useRef(0);
+  const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ---- KONAMI CODE ----
+  useEffect(() => {
+    const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let index = 0;
+
+    const onKey = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (key === konamiCode[index]) {
+        index++;
+        if (index === konamiCode.length) {
+          setGodMode(prev => !prev);
+          index = 0;
+        }
+      } else {
+        index = key === konamiCode[0] ? 1 : 0;
+      }
+    };
+
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // ---- FETCH GOD MODE STATS ----
+  useEffect(() => {
+    if (!godMode) return;
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.bankStats) setBankStats(data.bankStats);
+        if (data.aiStats) setAiStats(data.aiStats);
+      })
+      .catch(() => {});
+  }, [godMode]);
 
   // ---- INIT ----
   useEffect(() => {
@@ -171,6 +219,7 @@ export default function GiskaGame() {
           setCompleted(s.completed || false);
           setWon(s.won || false);
           setStartTime(s.startTime || Date.now());
+          if (s.randomMode) setRandomMode(true);
           if (s.completed) {
             setTimeout(() => setShowResults(true), 300);
           }
@@ -197,12 +246,25 @@ export default function GiskaGame() {
 
   // ---- SAVE ----
   const saveState = useCallback(() => {
+    if (!dailyWord) return;
+    const key = randomMode ? 'giska_random' : `giska_${puzzleNumber}`;
     try {
-      localStorage.setItem(`giska_${puzzleNumber}`, JSON.stringify({
-        questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber
+      localStorage.setItem(key, JSON.stringify({
+        questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber, randomMode
       } as GameState));
     } catch {}
-  }, [questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber]);
+  }, [questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber, dailyWord, randomMode]);
+
+  // ---- SAVE GOD STATS ----
+  const saveGodStats = useCallback(async (type: 'bank' | 'ai', questionId: string, questionText: string) => {
+    try {
+      await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, questionId, questionText }),
+      });
+    } catch {}
+  }, []);
 
   // ---- GAME LOGIC ----
   const askQuestion = useCallback((questionId: string) => {
@@ -217,12 +279,14 @@ export default function GiskaGame() {
     const newAsked = [...questionsAsked, { questionId, answer }];
     setQuestionsAsked(newAsked);
 
+    saveGodStats('bank', questionId, q.text);
+
     if (newAsked.length >= MAX_QUESTIONS) {
       setCompleted(true);
       setWon(false);
       setTimeout(() => setShowResults(true), 500);
     }
-  }, [completed, questionsAsked, dailyWord]);
+  }, [completed, questionsAsked, dailyWord, saveGodStats]);
 
   // After state updates, save
   useEffect(() => {
@@ -287,7 +351,6 @@ export default function GiskaGame() {
 
       const data = await res.json();
 
-      // Show specific messages for limit / no api key
       if (data.noApiKey) {
         setAiError('⚠️ La IA no está configurada. Usa las preguntas predefinidas.');
         setAiLoading(false);
@@ -314,6 +377,8 @@ export default function GiskaGame() {
       setQuestionsAsked(newAsked);
       setAiQuestion('');
 
+      saveGodStats('ai', `ai_${Date.now()}`, question);
+
       if (newAsked.length >= MAX_QUESTIONS) {
         setCompleted(true);
         setWon(false);
@@ -324,7 +389,43 @@ export default function GiskaGame() {
     } finally {
       setAiLoading(false);
     }
-  }, [aiQuestion, aiLoading, completed, dailyWord, questionsAsked]);
+  }, [aiQuestion, aiLoading, completed, dailyWord, questionsAsked, saveGodStats]);
+
+  // ---- RANDOM WORD ----
+  const playRandomWord = useCallback(() => {
+    const idx = Math.floor(Math.random() * WORDS.length);
+    const word = WORDS[idx];
+    setDailyWord(word);
+    setQuestionsAsked([]);
+    setGuessAttempts([]);
+    setCompleted(false);
+    setWon(false);
+    setStartTime(Date.now());
+    setElapsed(0);
+    setExpandedCategory(null);
+    setAiQuestion('');
+    setAiError('');
+    setGuessInput('');
+    setRandomMode(true);
+    setShowResults(false);
+    setGodMode(false);
+    // Clear random save
+    localStorage.removeItem('giska_random');
+    showToast('🎲 Palabra aleatoria cargada');
+  }, []);
+
+  // ---- LOGO TAP (mobile God Mode) ----
+  const handleLogoTap = useCallback(() => {
+    logoTapCount.current++;
+    if (logoTapCount.current >= 7) {
+      logoTapCount.current = 0;
+      if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+      setGodMode(prev => !prev);
+    } else {
+      if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+      logoTapTimer.current = setTimeout(() => { logoTapCount.current = 0; }, 3000);
+    }
+  }, []);
 
   // ---- SHARE ----
   const handleShare = useCallback(() => {
@@ -435,15 +536,29 @@ export default function GiskaGame() {
       <header className="glass-header sticky top-0 z-40 border-b border-[var(--border)]">
         <div className="max-w-[672px] mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black tracking-tight" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+            <h1
+              onClick={handleLogoTap}
+              className="text-2xl font-black tracking-tight cursor-pointer select-none"
+              style={{ fontFamily: 'var(--font-space-grotesk)' }}
+            >
               <span className="text-[var(--primary)]">GIS</span>
               <span className="text-[var(--ring)]">KA</span>
             </h1>
             <span className="text-[0.7rem] font-mono bg-[var(--muted)] text-[var(--foreground)] px-2 py-0.5 rounded-full border border-[var(--border)]">
               #{puzzleNumber}
             </span>
+            {randomMode && (
+              <span className="text-[0.6rem] font-semibold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
+                🎲 Aleatorio
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2">
+            {godMode && (
+              <span className="text-xs font-semibold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/30">
+                ⚡ Dios
+              </span>
+            )}
             <div className="flex items-center gap-1 text-[var(--muted-foreground)] font-mono text-sm">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               <span>{formatTime(elapsed)}</span>
@@ -737,7 +852,12 @@ export default function GiskaGame() {
               </button>
             </div>
             <p className="text-center text-xs text-[var(--muted-foreground)]">
-              Vuelve mañana para un nuevo puzzle 🌅
+              {!randomMode && 'Vuelve mañana para un nuevo puzzle 🌅'}
+              {randomMode && (
+                <button onClick={playRandomWord} className="underline hover:text-[var(--primary)] transition-colors">
+                  🎲 Jugar otra palabra aleatoria
+                </button>
+              )}
             </p>
           </div>
         )}
@@ -773,7 +893,7 @@ export default function GiskaGame() {
               {[
                 'Cada día aparece una palabra en otro idioma. Tu objetivo es adivinar su significado en español.',
                 'Haz preguntas de Sí o No eligiendo de las categorías disponibles.',
-                'Tienes un máximo de 15 preguntas y 5 intentos para adivinar.',
+                'Tienes un máximo de 20 preguntas y 5 intentos para adivinar.',
                 '¡Nuevo! Escribe cualquier pregunta y una IA te responderá. ¡Sin límite!',
                 'Puedes intentar adivinar en cualquier momento.',
                 '¡Comparte tus resultados con tus amigos! 🎉 Cuantas menos preguntas, más estrellas.',
@@ -815,7 +935,7 @@ export default function GiskaGame() {
             <h2 className="text-center text-xl font-extrabold mb-1" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
               {won ? '🎉 ¡Enhorabuena!' : '😔 ¡Casi!'}
             </h2>
-            <p className="text-center text-sm text-[var(--muted-foreground)] mb-4">GISKA #{puzzleNumber}</p>
+            <p className="text-center text-sm text-[var(--muted-foreground)] mb-4">GISKA #{puzzleNumber}{randomMode ? ' (Aleatorio)' : ''}</p>
 
             <div className="bg-[var(--muted)] border-2 border-[var(--primary)]/20 rounded-xl p-4 text-center mb-4">
               <p className="text-sm text-[var(--muted-foreground)]">La palabra era</p>
@@ -868,8 +988,161 @@ export default function GiskaGame() {
             </button>
 
             <p className="text-center text-xs text-[var(--muted-foreground)]">
-              ¡Vuelve mañana para un nuevo puzzle! 🌅
+              {!randomMode && '¡Vuelve mañana para un nuevo puzzle! 🌅'}
+              {randomMode && '🎲 Estás en modo aleatorio'}
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ============ GOD MODE PANEL ============ */}
+      {godMode && (
+        <div className="fixed inset-0 z-[60] flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setGodMode(false)}
+          />
+
+          {/* Panel */}
+          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[var(--card)] border-l border-[var(--border)] shadow-2xl flex flex-col overflow-hidden">
+            {/* Header */}
+            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between bg-gradient-to-r from-purple-900/20 to-transparent shrink-0">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                ⚡ Modo Dios
+              </h2>
+              <button
+                onClick={() => setGodMode(false)}
+                className="p-2 rounded-lg hover:bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-lg leading-none"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-[var(--border)] shrink-0">
+              {(['banco', 'ia', 'aleatorio'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setGodTab(tab)}
+                  className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                    godTab === tab
+                      ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] bg-[var(--accent)]'
+                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/50'
+                  }`}
+                >
+                  {tab === 'banco' && '🏦 Banco'}
+                  {tab === 'ia' && '🤖 IA'}
+                  {tab === 'aleatorio' && '🎲 Aleatorio'}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {godTab === 'banco' && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    Preguntas del banco más usadas por todos los jugadores
+                  </p>
+                  {Object.entries(bankStats)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 20)
+                    .map(([id, count], i) => {
+                      const q = QUESTIONS.find(x => x.id === id);
+                      return (
+                        <div
+                          key={id}
+                          className="flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]"
+                        >
+                          <span className="text-xs font-mono text-[var(--muted-foreground)] w-6 text-right">{i + 1}.</span>
+                          <span className="text-lg">{q?.icon || '❓'}</span>
+                          <span className="flex-1 text-sm">{q?.text || id}</span>
+                          <span className="font-bold text-sm text-[var(--primary)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
+                            {count}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  {Object.keys(bankStats).length === 0 && (
+                    <div className="text-center py-8 text-[var(--muted-foreground)]">
+                      <p className="text-3xl mb-2">📭</p>
+                      <p className="text-sm">No hay datos todavía.</p>
+                      <p className="text-xs mt-1">Los datos aparecerán cuando los jugadores hagan preguntas.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {godTab === 'ia' && (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    Preguntas más hechas a la IA por todos los jugadores
+                  </p>
+                  {Object.entries(aiStats)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 20)
+                    .map(([text, count], i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]"
+                      >
+                        <span className="text-xs font-mono text-[var(--muted-foreground)] w-6 text-right">{i + 1}.</span>
+                        <span className="text-lg">🤖</span>
+                        <span className="flex-1 text-sm">{text}</span>
+                        <span className="font-bold text-sm text-[var(--primary)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
+                          {count}
+                        </span>
+                      </div>
+                    ))}
+                  {Object.keys(aiStats).length === 0 && (
+                    <div className="text-center py-8 text-[var(--muted-foreground)]">
+                      <p className="text-3xl mb-2">📭</p>
+                      <p className="text-sm">No hay datos todavía.</p>
+                      <p className="text-xs mt-1">Los datos aparecerán cuando los jugadores pregunten a la IA.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {godTab === 'aleatorio' && (
+                <div className="flex flex-col gap-4">
+                  <div className="text-center">
+                    <p className="text-3xl mb-3">🎲</p>
+                    <p className="text-sm text-[var(--muted-foreground)] mb-1">
+                      Juega con una palabra aleatoria
+                    </p>
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      {WORDS.length} palabras disponibles en la base de datos
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={playRandomWord}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-bold text-base transition-opacity hover:opacity-90 shadow-lg"
+                  >
+                    🎲 Jugar palabra aleatoria
+                  </button>
+
+                  {randomMode && (
+                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                      <p className="text-sm font-semibold text-amber-400">
+                        🎲 Estás en modo aleatorio
+                      </p>
+                      <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                        La palabra actual no es la del día. Tu partida no se guardará como resultado oficial.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-2 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]">
+                    <p className="text-xs text-[var(--muted-foreground)] text-center">
+                      💡 <strong>Consejo:</strong> Usa el modo aleatorio para probar el juego y ajustar las preguntas antes de que juegue el público.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
