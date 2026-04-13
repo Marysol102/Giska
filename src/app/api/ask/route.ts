@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 // ============================================================
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_MODEL = "gemini-1.5-flash";
 
 // ============================================================
 // SMART CACHE — Semantic keyword matching for similar questions
@@ -184,7 +184,7 @@ Reglas:
   if (!response.ok) {
     const errText = await response.text();
     console.error("Gemini API error:", response.status, errText);
-    throw new Error(`Gemini API error: ${response.status}`);
+    throw new Error(`Gemini API error ${response.status}: ${errText.slice(0, 200)}`);
   }
 
   const data = await response.json();
@@ -313,12 +313,13 @@ export async function POST(req: NextRequest) {
       dailyCount: getDailyCount(),
       dailyLimit: DAILY_LIMIT,
     });
-  } catch (error) {
-    console.error("AI question error:", error);
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("AI question error:", errorMsg);
     return NextResponse.json(
       {
         answer: "no_sense",
-        explanation: "Error al procesar la pregunta. Intentalo de nuevo.",
+        explanation: `Error: ${errorMsg}`,
       },
       { status: 200 }
     );
