@@ -879,14 +879,14 @@ export default function GiskaGame() {
         )}
 
         {/* QUESTION HISTORY */}
-        {questionsAsked.length > 0 && (
+        {(questionsAsked.length > 0 || allQuestionsRef.current.length > 0) && (
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 sm:p-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-[var(--muted-foreground)] mb-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Historial de preguntas
             </div>
             <div ref={historyRef} className="max-h-48 overflow-y-auto history-scroll flex flex-col gap-1.5">
-              {questionsAsked.map((q, i) => {
+              {[...allQuestionsRef.current, ...questionsAsked].map((q, i) => {
                 const question = QUESTIONS.find(x => x.id === q.questionId);
                 const text = question?.text || q.aiText || '?';
                 const icon = question?.icon || '🤖';
