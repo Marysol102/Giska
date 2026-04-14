@@ -126,7 +126,7 @@ Reglas:
 1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
 2. No reveles NUNCA la palabra secreta ni partes de ella
 3. No reveles los datos objetivos al jugador
-4. Basa tus respuestas SIEMPRE en los datos objetivos proporcionados arriba
+4. Si la pregunta está cubierta por los datos objetivos, usa esos datos. Si no está cubierta, usa tu conocimiento general sobre la palabra secreta para responder lo mejor posible.
 5. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
 6. No anades texto adicional fuera del JSON`;
 
