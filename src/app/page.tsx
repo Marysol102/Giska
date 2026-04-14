@@ -442,7 +442,7 @@ export default function GiskaGame() {
   // ---- GAME LOGIC ----
   const askQuestion = useCallback((questionId: string) => {
     if (completed || questionsAsked.length >= MAX_QUESTIONS || showLimitModal) return;
-    if (questionsAsked.some(q => q.questionId === questionId)) return;
+    if ([...allQuestionsRef.current, ...questionsAsked].some(q => q.questionId === questionId)) return;
     if (!dailyWord) return;
 
     const q = QUESTIONS.find(x => x.id === questionId);
@@ -772,7 +772,7 @@ export default function GiskaGame() {
               {Object.entries(CATEGORIES).map(([cat, info]) => {
                 const isActive = expandedCategory === cat;
                 const catQs = QUESTIONS.filter(q => q.category === cat);
-                const askedCount = catQs.filter(q => questionsAsked.some(qa => qa.questionId === q.id)).length;
+                const askedCount = catQs.filter(q => [...allQuestionsRef.current, ...questionsAsked].some(qa => qa.questionId === q.id)).length;
 
                 return (
                   <button
@@ -802,7 +802,7 @@ export default function GiskaGame() {
                 </div>
                 <div className="flex flex-col gap-2">
                   {QUESTIONS.filter(q => q.category === expandedCategory).map(q => {
-                    const asked = questionsAsked.find(qa => qa.questionId === q.id);
+                    const asked = [...allQuestionsRef.current, ...questionsAsked].find(qa => qa.questionId === q.id);
                     const answer = asked?.answer;
                     const disabled = !!asked || questionsLeft <= 0;
 
