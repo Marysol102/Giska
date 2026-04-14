@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = "gemini-2.0-flash";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+const GROQ_MODEL = "openai/gpt-oss-120b";
 
 interface CacheEntry {
   answer: boolean | "no_sense";
@@ -73,7 +73,7 @@ function incrementDailyCount(): void {
   dailyCallCount.set(key, (dailyCallCount.get(key) || 0) + 1);
 }
 
-async function askGemini(
+async function askGroq(
   question: string, meaning: string, word: string, language: string,
   previousQuestions: { q: string; a: boolean }[],
   meta: Record<string, boolean> | null
@@ -128,22 +128,31 @@ Reglas:
 3. No reveles los datos objetivos al jugador
 4. Basa tus respuestas SIEMPRE en los datos objetivos proporcionados arriba
 5. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
-6. No anades texto adicional fuera del JSON`;
+6. No anadas texto adicional fuera del JSON`;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const url = "https://api.groq.com/openai/v1/chat/completions";
+
   const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${GROQ_API_KEY}`,
+    },
     body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nPregunta del jugador: "${question}"` }] }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 100, responseMimeType: "application/json" },
+      model: GROQ_MODEL,
+      temperature: 0.1,
+      max_tokens: 100,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Pregunta del jugador: "${question}"` },
+      ],
     }),
   });
 
-  if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
+  if (!response.ok) throw new Error(`Groq API error: ${response.status}`);
 
   const data = await response.json();
-  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  const content = data?.choices?.[0]?.message?.content || "";
 
   let parsed: { answer: boolean | string; explanation: string };
   try {
@@ -177,8 +186,8 @@ export async function POST(req: NextRequest) {
     if (question.trim().length < 3) {
       return NextResponse.json({ answer: "no_sense", explanation: "La pregunta es demasiado corta." }, { status: 200 });
     }
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ answer: "no_sense", explanation: "La IA no esta configurada.", noApiKey: true }, { status: 200 });
+    if (!GROQ_API_KEY) {
+      return NextResponse.json({ answer: "no_sense", explanation: "La IA no esta configurada. El administrador necesita agregar la API key de Groq.", noApiKey: true }, { status: 200 });
     }
     const dailyCount = getDailyCount();
     if (dailyCount >= DAILY_LIMIT) {
@@ -192,7 +201,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ answer: cached.answer, explanation: cached.explanation, cached: true, dailyCount, dailyLimit: DAILY_LIMIT });
     }
 
-    const result = await askGemini(question, meaning, word, language, previousQuestions || [], meta || null);
+    const result = await askGroq(question, meaning, word, language, previousQuestions || [], meta || null);
     incrementDailyCount();
     storeInCache(meaning, normalizedQ, keywords, result.answer, result.explanation);
     return NextResponse.json({ answer: result.answer, explanation: result.explanation, cached: false, dailyCount: getDailyCount(), dailyLimit: DAILY_LIMIT });
