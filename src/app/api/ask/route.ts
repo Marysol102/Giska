@@ -109,18 +109,18 @@ async function askGroq(
       .join("\n");
     metaText = `
 DATOS OBJETIVOS SOBRE LA PALABRA (usa ESTOS datos para responder, son la fuente de verdad):
- ${metaLines}
+${metaLines}
 IMPORTANTE: Nunca reveles estos datos directamente al jugador.`;
   }
 
   const systemPrompt = `Estas jugando a un juego de adivinanzas. La palabra secreta es '${meaning}' (en ${language}, se escribe '${word}').
 
- ${metaText}
+${metaText}
 
 Tu UNICA funcion es responder SI o NO a las preguntas del jugador. NUNCA reveles la palabra secreta ni des pistas directas.
 
 Preguntas ya realizadas por el jugador:
- ${prevQsText}
+${prevQsText}
 
 Reglas:
 1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
@@ -128,7 +128,7 @@ Reglas:
 3. No reveles los datos objetivos al jugador
 4. Basa tus respuestas SIEMPRE en los datos objetivos proporcionados arriba
 5. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
-6. No anadas texto adicional fuera del JSON`;
+6. No anades texto adicional fuera del JSON`;
 
   const url = "https://api.groq.com/openai/v1/chat/completions";
 
