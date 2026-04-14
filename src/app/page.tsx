@@ -255,33 +255,7 @@ export default function GiskaGame() {
   const [godBankStats, setGodBankStats] = useState<Record<string, number>>({});
   const [godAIStats, setGodAIStats] = useState<Record<string, number>>({});
   const [godStatsLoading, setGodStatsLoading] = useState(false);
-  
- // ---- SAVE GOD STATS ----
-  const saveGodStats = useCallback(async (questionId: string, isAI: boolean, text?: string) => {
-    try {
-      await fetch('/api/stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, isAI, text }),
-      });
-    } catch {}
-  }, []);
 
-  // ---- LOAD GOD STATS FROM SERVER ----
-  const loadGodStatsFromServer = useCallback(async () => {
-    setGodStatsLoading(true);
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      setGodBankStats(data.bankStats || {});
-      setGodAIStats(data.aiStats || {});
-    } catch {
-      setGodBankStats({});
-      setGodAIStats({});
-    } finally {
-      setGodStatsLoading(false);
-    }
-  }, []);
   // ---- KONAMI CODE ----
   useEffect(() => {
     const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
@@ -313,6 +287,33 @@ export default function GiskaGame() {
       });
     }
   }, [loadGodStatsFromServer]);
+
+  // ---- SAVE GOD STATS ----
+  const saveGodStats = useCallback(async (questionId: string, isAI: boolean, text?: string) => {
+    try {
+      await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, isAI, text }),
+      });
+    } catch {}
+  }, []);
+
+  // ---- LOAD GOD STATS FROM SERVER ----
+  const loadGodStatsFromServer = useCallback(async () => {
+    setGodStatsLoading(true);
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      setGodBankStats(data.bankStats || {});
+      setGodAIStats(data.aiStats || {});
+    } catch {
+      setGodBankStats({});
+      setGodAIStats({});
+    } finally {
+      setGodStatsLoading(false);
+    }
+  }, []);
 
   // ---- RANDOM WORD ----
   const playRandomWord = useCallback(() => {
@@ -572,10 +573,7 @@ export default function GiskaGame() {
     if (!won) text += ` | Intentos: ${guessAttempts.length}/${MAX_GUESSES}`;
     text += '\n';
     const allQs = [...allQuestionsRef.current, ...questionsAsked];
-    const icons = allQs.map(q => {
-      const question = QUESTIONS.find(x => x.id === q.questionId);
-      return `${question?.icon || '🤖'}${q.answer ? '✅' : '❌'}`;
-    });
+    const icons = allQs.map(q => `${q.answer ? '✅' : '❌'}`);
     for (let i = 0; i < icons.length; i += 5) {
       text += icons.slice(i, i + 5).join(' ') + '\n';
     }
@@ -917,10 +915,13 @@ export default function GiskaGame() {
         {/* GUESS SECTION */}
         {!completed && (
           <div className="flex flex-col gap-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-              ¿Ya sabes la respuesta?
-            </h3>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-lg">🎯</span>
+              <h3 className="text-sm font-extrabold text-[var(--foreground)]">
+                ESCRIBE TU RESPUESTA AQUÍ
+              </h3>
+            </div>
+            <div className="flex gap-2 p-3 rounded-xl border-2 border-solid border-[var(--primary)] bg-[var(--primary)]/5">
               <input
                 ref={guessInputRef}
                 type="text"
@@ -1097,22 +1098,18 @@ export default function GiskaGame() {
 
             {/* Timeline */}
             <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-              {[...allQuestionsRef.current, ...questionsAsked].map((q, i) => {
-                const question = QUESTIONS.find(x => x.id === q.questionId);
-                return (
+              {[...allQuestionsRef.current, ...questionsAsked].map((q, i) => (
                   <span
                     key={i}
-                    title={question?.text || q.aiText || ''}
                     className={`text-xs px-2 py-0.5 rounded-full border
                       ${q.answer
                         ? 'border-[var(--ring)] text-[var(--ring)] bg-[var(--accent)]'
                         : 'border-[var(--destructive)] text-[var(--destructive)] bg-[var(--destructive)]/5'
                       }`}
                   >
-                    {question?.icon || '🤖'} {q.answer ? '✅' : '❌'}
+                    {q.answer ? '✅' : '❌'}
                   </span>
-                );
-              })}
+                ))}
             </div>
 
             <button
