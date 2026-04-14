@@ -346,6 +346,7 @@ export default function GiskaGame() {
           word: dailyWord.word,
           language: dailyWord.language,
           previousQuestions: prevQs,
+          meta: dailyWord.meta,
         }),
       });
 
