@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-const GROQ_MODEL = "openai/gpt-oss-120b";
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 interface CacheEntry {
   answer: boolean | "no_sense";
@@ -12,21 +12,22 @@ interface CacheEntry {
 
 const questionCache = new Map<string, CacheEntry[]>();
 const dailyCallCount = new Map<string, number>();
-const DAILY_LIMIT = 500;
+const DAILY_LIMIT = 200;
 
 const STOP_WORDS = new Set([
-  "es","un","una","unos","unas","el","la","los","las","al","del",
-  "de","en","por","para","con","sin","sobre","entre","hacia","hasta",
-  "que","quien","cual","donde","cuando","como","cuanto","cuantos",
-  "su","sus","mi","tu","se","me","te","le","nos","les","lo",
-  "y","o","pero","mas","muy","ya","no","si","ni","tambien","tan",
-  "tiene","puede","ser","estar","hay","son","era","fueron","algo",
-  "este","esta","ese","esa","eso","aquello","esto",
-  "suele","suelen","saber","hacer","mismo","misma","tipo","forma","vez",
+  "es", "un", "una", "unos", "unas", "el", "la", "los", "las", "al", "del",
+  "de", "en", "por", "para", "con", "sin", "sobre", "entre", "hacia", "hasta",
+  "que", "quien", "cual", "donde", "cuando", "como", "cuanto", "cuantos",
+  "su", "sus", "mi", "tu", "se", "me", "te", "le", "nos", "les", "lo",
+  "y", "o", "pero", "mas", "muy", "ya", "no", "si", "ni", "tambien", "tan",
+  "tiene", "puede", "ser", "estar", "hay", "son", "era", "fueron", "algo",
+  "este", "esta", "ese", "esa", "eso", "aquello", "esto",
+  "suele", "suelen", "saber", "hacer",
+  "mismo", "misma", "tipo", "forma", "vez",
 ]);
 
 function normalize(text: string): string {
-  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[¿?¡!,.\-;:'"]/g,"").replace(/\s+/g," ").trim();
+  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[¿?¡!,.\-;:'"]/g, "").replace(/\s+/g, " ").trim();
 }
 
 function extractKeywords(normalizedQ: string): string[] {
@@ -48,11 +49,12 @@ function findCachedAnswer(meaning: string, normalizedQ: string, keywords: string
   if (!entries || entries.length === 0) return null;
   const exact = entries.find((e) => e.normalizedQ === normalizedQ);
   if (exact) return exact;
+  const THRESHOLD = 0.6;
   let bestMatch: CacheEntry | null = null;
   let bestScore = 0;
   for (const entry of entries) {
     const score = keywordSimilarity(keywords, entry.keywords);
-    if (score > bestScore && score >= 0.6) { bestScore = score; bestMatch = entry; }
+    if (score > bestScore && score >= THRESHOLD) { bestScore = score; bestMatch = entry; }
   }
   return bestMatch;
 }
@@ -71,49 +73,77 @@ function incrementDailyCount(): void {
   dailyCallCount.set(key, (dailyCallCount.get(key) || 0) + 1);
 }
 
-async function askGroq(
+async function askGemini(
   question: string, meaning: string, word: string, language: string,
-  previousQuestions: { q: string; a: boolean }[], meta?: Record<string, boolean>
+  previousQuestions: { q: string; a: boolean }[],
+  meta: Record<string, boolean> | null
 ): Promise<{ answer: boolean | "no_sense"; explanation: string }> {
-  const metaInfo = typeof meta === 'object' && meta
-    ? Object.entries(meta).filter(([, v]) => v === true).map(([k]) => k.replace(/_/g, ' ')).join(', ')
-    : 'no disponible';
-
   const prevQsText = previousQuestions?.map((pq) => `- Pregunta: "${pq.q}" -> Respuesta: ${pq.a ? "Si" : "No"}`).join("\n") || "Ninguna.";
 
-  const systemPrompt = `Eres un juez en un juego de adivinanzas. Tu trabajo es responder SI o NO con precision.
+  let metaText = "";
+  if (meta && typeof meta === "object" && Object.keys(meta).length > 0) {
+    const labels: Record<string, string> = {
+      is_animal: "Animal", is_food: "Comida/bebida", is_object: "Objeto",
+      is_body_part: "Parte del cuerpo", is_place: "Lugar",
+      is_emotion: "Emocion/sentimiento", is_action: "Accion/verbo",
+      is_clothing: "Ropa/accesorio", is_vehicle: "Vehiculo", is_plant: "Planta",
+      is_weather: "Fenomeno climatico", is_profession: "Profesion/oficio",
+      is_natural: "Natural (no creado por humanos)", is_alive: "Esta vivo",
+      is_man_made: "Creado por humanos", is_tangible: "Se puede tocar",
+      is_heavy: "Pesado", is_soft: "Suave/flexible", is_round: "Redondo",
+      is_shiny: "Brilla/refleja luz", is_colorful: "Colorido",
+      is_cold: "Frio al tacto", has_parts: "Tiene varias partes",
+      is_found_indoors: "Se encuentra dentro de casa",
+      is_found_outdoors: "Se encuentra al aire libre",
+      is_found_in_water: "Se encuentra en el agua",
+      is_found_in_sky: "Se encuentra en el cielo/alto",
+      is_used_daily: "Se usa a diario", can_be_bought: "Se puede comprar en tienda",
+      is_edible: "Se puede comer/beber", is_dangerous: "Peligroso",
+      makes_sound: "Hace sonido", can_be_worn: "Se puede llevar puesto",
+      is_bigger_than_person: "Mas grande que una persona",
+      fits_in_hand: "Cabe en una mano",
+    };
+    const metaLines = Object.entries(meta)
+      .filter(([key]) => labels[key])
+      .map(([key, val]) => `  - ${labels[key]}: ${val ? "SI" : "NO"}`)
+      .join("\n");
+    metaText = `
+DATOS OBJETIVOS SOBRE LA PALABRA (usa ESTOS datos para responder, son la fuente de verdad):
+ ${metaLines}
+IMPORTANTE: Nunca reveles estos datos directamente al jugador.`;
+  }
 
-PALABRA SECRETA: "${meaning}" (en ${language}: "${word}")
-DATOS OBJETIVOS de la palabra: ${metaInfo}
-Preguntas ya respondidas:
+  const systemPrompt = `Estas jugando a un juego de adivinanzas. La palabra secreta es '${meaning}' (en ${language}, se escribe '${word}').
+
+ ${metaText}
+
+Tu UNICA funcion es responder SI o NO a las preguntas del jugador. NUNCA reveles la palabra secreta ni des pistas directas.
+
+Preguntas ya realizadas por el jugador:
  ${prevQsText}
 
-Reglas ESTRICTAS:
-1. Respondes SOLO con JSON: {"answer": true/false, "explanation": "razon breve en espanol"}
-2. Si la pregunta no se puede responder con si/no: {"answer": "no_sense", "explanation": "No puedo responder eso."}
-3. NO reveles NUNCA la palabra secreta ni partes de ella
-4. NO inventes informacion. Usa los datos objetivos proporcionados para decidir.
-5. Si la pregunta es sobre algo que no esta en los datos objetivos, razona logicamente pero no inventes.
-6. Responde EXACTAMENTE JSON, sin texto antes ni despues.`;
+Reglas:
+1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
+2. No reveles NUNCA la palabra secreta ni partes de ella
+3. No reveles los datos objetivos al jugador
+4. Basa tus respuestas SIEMPRE en los datos objetivos proporcionados arriba
+5. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
+6. No anades texto adicional fuera del JSON`;
 
-  const userPrompt = `Pregunta del jugador: "${question}"\n\nResponde en JSON.`;
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  const response = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: GROQ_MODEL, temperature: 0.1, max_tokens: 150,
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+      contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nPregunta del jugador: "${question}"` }] }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: 100, responseMimeType: "application/json" },
     }),
   });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Groq API error ${response.status}: ${errText.slice(0, 200)}`);
-  }
+  if (!response.ok) throw new Error(`Gemini API error: ${response.status}`);
 
   const data = await response.json();
-  const content = data?.choices?.[0]?.message?.content || "";
+  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
   let parsed: { answer: boolean | string; explanation: string };
   try {
@@ -144,15 +174,12 @@ export async function POST(req: NextRequest) {
     if (!question || !meaning || !word || !language) {
       return NextResponse.json({ error: "Faltan parametros requeridos" }, { status: 400 });
     }
-
     if (question.trim().length < 3) {
       return NextResponse.json({ answer: "no_sense", explanation: "La pregunta es demasiado corta." }, { status: 200 });
     }
-
-    if (!GROQ_API_KEY) {
+    if (!GEMINI_API_KEY) {
       return NextResponse.json({ answer: "no_sense", explanation: "La IA no esta configurada.", noApiKey: true }, { status: 200 });
     }
-
     const dailyCount = getDailyCount();
     if (dailyCount >= DAILY_LIMIT) {
       return NextResponse.json({ answer: "no_sense", explanation: "Hoy se han agotado las preguntas a la IA.", dailyLimitReached: true, dailyCount, dailyLimit: DAILY_LIMIT }, { status: 200 });
@@ -160,20 +187,17 @@ export async function POST(req: NextRequest) {
 
     const normalizedQ = normalize(question);
     const keywords = extractKeywords(normalizedQ);
-
     const cached = findCachedAnswer(meaning, normalizedQ, keywords);
     if (cached) {
       return NextResponse.json({ answer: cached.answer, explanation: cached.explanation, cached: true, dailyCount, dailyLimit: DAILY_LIMIT });
     }
 
-    const result = await askGroq(question, meaning, word, language, previousQuestions || [], meta as Record<string, boolean> | undefined);
+    const result = await askGemini(question, meaning, word, language, previousQuestions || [], meta || null);
     incrementDailyCount();
     storeInCache(meaning, normalizedQ, keywords, result.answer, result.explanation);
-
     return NextResponse.json({ answer: result.answer, explanation: result.explanation, cached: false, dailyCount: getDailyCount(), dailyLimit: DAILY_LIMIT });
-  } catch (error: unknown) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error("AI question error:", errorMsg);
-    return NextResponse.json({ answer: "no_sense", explanation: `Error: ${errorMsg}` }, { status: 200 });
+  } catch (error) {
+    console.error("AI question error:", error);
+    return NextResponse.json({ answer: "no_sense", explanation: "Error al procesar la pregunta. Intentalo de nuevo." }, { status: 200 });
   }
 }
