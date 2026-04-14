@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import WORDS from '@/data/words';
 
 // ============================================================
 // GAME DATA
@@ -64,6 +63,101 @@ interface WordObj {
   meta: WordMeta;
 }
 
+const WORDS: WordObj[] = [
+  { word:"Schmetterling", language:"Alemán", flag:"🇩🇪", meaning:"Mariposa", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Schildkröte", language:"Alemán", flag:"🇩🇪", meaning:"Tortuga", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:false, is_round:true, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Nashorn", language:"Alemán", flag:"🇩🇪", meaning:"Rinoceronte", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Eisbär", language:"Alemán", flag:"🇩🇪", meaning:"Oso polar", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Escargot", language:"Francés", flag:"🇫🇷", meaning:"Caracol", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Girafe", language:"Francés", flag:"🇫🇷", meaning:"Jirafa", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Tora", language:"Japonés", flag:"🇯🇵", meaning:"Tigre", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Delfino", language:"Italiano", flag:"🇮🇹", meaning:"Delfín", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Cachorro", language:"Portugués", flag:"🇧🇷", meaning:"Cachorro", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Papagaio", language:"Portugués", flag:"🇧🇷", meaning:"Loro", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_sky:true, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Schokolade", language:"Alemán", flag:"🇩🇪", meaning:"Chocolate", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Apfel", language:"Alemán", flag:"🇩🇪", meaning:"Manzana", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Fromage", language:"Francés", flag:"🇫🇷", meaning:"Queso", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Pomodoro", language:"Italiano", flag:"🇮🇹", meaning:"Tomate", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Abacaxi", language:"Portugués", flag:"🇧🇷", meaning:"Piña", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Jordgubbe", language:"Sueco", flag:"🇸🇪", meaning:"Fresa", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Pane", language:"Italiano", flag:"🇮🇹", meaning:"Pan", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Cerveja", language:"Portugués", flag:"🇧🇷", meaning:"Cerveza", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Kahvi", language:"Finlandés", flag:"🇫🇮", meaning:"Café", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Miele", language:"Italiano", flag:"🇮🇹", meaning:"Miel", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Schlüssel", language:"Alemán", flag:"🇩🇪", meaning:"Llave", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Handschuh", language:"Alemán", flag:"🇩🇪", meaning:"Guante", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:true, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Parapluie", language:"Francés", flag:"🇫🇷", meaning:"Paraguas", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Specchio", language:"Italiano", flag:"🇮🇹", meaning:"Espejo", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Cucchiaio", language:"Italiano", flag:"🇮🇹", meaning:"Cuchara", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Staubsauger", language:"Alemán", flag:"🇩🇪", meaning:"Aspiradora", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Kello", language:"Finlandés", flag:"🇫🇮", meaning:"Reloj", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:true, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Sakset", language:"Finlandés", flag:"🇫🇮", meaning:"Tijeras", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Buku", language:"Indonesio", flag:"🇮🇩", meaning:"Libro", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Montagne", language:"Francés", flag:"🇫🇷", meaning:"Montaña", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Fleur", language:"Francés", flag:"🇫🇷", meaning:"Flor", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:true, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Soleil", language:"Francés", flag:"🇫🇷", meaning:"Sol", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:true, is_soft:false, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Étoile", language:"Francés", flag:"🇫🇷", meaning:"Estrella", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:true, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Sakura", language:"Japonés", flag:"🇯🇵", meaning:"Flor de cerezo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:true, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Vulkan", language:"Alemán", flag:"🇩🇪", meaning:"Volcán", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Snöflinga", language:"Sueco", flag:"🇸🇪", meaning:"Copo de nieve", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Château", language:"Francés", flag:"🇫🇷", meaning:"Castillo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Bibliothèque", language:"Francés", flag:"🇫🇷", meaning:"Biblioteca", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Leuchtturm", language:"Alemán", flag:"🇩🇪", meaning:"Faro", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Cuore", language:"Italiano", flag:"🇮🇹", meaning:"Corazón", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Main", language:"Francés", flag:"🇫🇷", meaning:"Mano", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Öga", language:"Sueco", flag:"🇸🇪", meaning:"Ojo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Hattu", language:"Finlandés", flag:"🇫🇮", meaning:"Sombrero", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:true, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:true, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Schal", language:"Alemán", flag:"🇩🇪", meaning:"Bufanda", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:true, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Stivali", language:"Italiano", flag:"🇮🇹", meaning:"Botas", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:true, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Fahrrad", language:"Alemán", flag:"🇩🇪", meaning:"Bicicleta", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:true, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Lentokone", language:"Finlandés", flag:"🇫🇮", meaning:"Avión", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:true, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Laiva", language:"Finlandés", flag:"🇫🇮", meaning:"Barco", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:true, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Treno", language:"Italiano", flag:"🇮🇹", meaning:"Tren", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:true, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Regenbogen", language:"Alemán", flag:"🇩🇪", meaning:"Arcoíris", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Orage", language:"Francés", flag:"🇫🇷", meaning:"Tormenta", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Tuuli", language:"Finlandés", flag:"🇫🇮", meaning:"Viento", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:true, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Simba", language:"Swahili", flag:"🇰🇪", meaning:"León", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Tembo", language:"Swahili", flag:"🇰🇪", meaning:"Elefante", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Zebra", language:"Swahili", flag:"🇰🇪", meaning:"Cebra", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Baum", language:"Alemán", flag:"🇩🇪", meaning:"Árbol", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:true, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Ruusu", language:"Finlandés", flag:"🇫🇮", meaning:"Rosa", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:true, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Gioia", language:"Italiano", flag:"🇮🇹", meaning:"Alegría", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:true, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Courage", language:"Francés", flag:"🇫🇷", meaning:"Coraje", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:true, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Danser", language:"Francés", flag:"🇫🇷", meaning:"Bailar", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:true, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Schlafen", language:"Alemán", flag:"🇩🇪", meaning:"Dormir", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:true, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Peur", language:"Francés", flag:"🇫🇷", meaning:"Miedo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:true, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Médecin", language:"Francés", flag:"🇫🇷", meaning:"Médico", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:true, is_natural:false, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Ingegnere", language:"Italiano", flag:"🇮🇹", meaning:"Ingeniero", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:true, is_natural:false, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Talvi", language:"Finlandés", flag:"🇫🇮", meaning:"Invierno", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Jää", language:"Finlandés", flag:"🇫🇮", meaning:"Hielo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:true, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Feuerwerk", language:"Alemán", flag:"🇩🇪", meaning:"Fuegos artificiales", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Bijou", language:"Francés", flag:"🇫🇷", meaning:"Joya", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:true, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:true, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Kühlschrank", language:"Alemán", flag:"🇩🇪", meaning:"Refrigerador", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:true, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Skägg", language:"Sueco", flag:"🇸🇪", meaning:"Barba", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Pilvi", language:"Finlandés", flag:"🇫🇮", meaning:"Nube", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Silta", language:"Finlandés", flag:"🇫🇮", meaning:"Puente", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Porta", language:"Italiano", flag:"🇮🇹", meaning:"Puerta", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Brev", language:"Sueco", flag:"🇸🇪", meaning:"Carta", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Ladder", language:"Inglés", flag:"🇬🇧", meaning:"Escalera", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Vespa", language:"Italiano", flag:"🇮🇹", meaning:"Avispa", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Kamen", language:"Checo", flag:"🇨🇿", meaning:"Piedra", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Fontana", language:"Italiano", flag:"🇮🇹", meaning:"Fuente", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:true, is_soft:false, is_round:true, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Mercato", language:"Italiano", flag:"🇮🇹", meaning:"Mercado", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Krokodil", language:"Holandés", flag:"🇳🇱", meaning:"Cocodrilo", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:true, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Kanguru", language:"Alemán", flag:"🇩🇪", meaning:"Canguro", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Panda", language:"Chino (pinyin)", flag:"🇨🇳", meaning:"Oso panda", meta:{ is_animal:true, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+  { word:"Suklaa", language:"Finlandés", flag:"🇫🇮", meaning:"Chocolate", meta:{ is_animal:false, is_food:true, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:true, is_colorful:false, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:true, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Korva", language:"Finlandés", flag:"🇫🇮", meaning:"Oreja", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Matto", language:"Finlandés", flag:"🇫🇮", meaning:"Alfombra", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:true, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Sieni", language:"Finlandés", flag:"🇫🇮", meaning:"Seta", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:true, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:true, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Sumo", language:"Japonés", flag:"🇯🇵", meaning:"Luchador de sumo", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:true, is_natural:false, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:true, is_round:true, is_shiny:false, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Relâmpago", language:"Portugués", flag:"🇧🇷", meaning:"Relámpago", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:false, is_soft:false, is_round:false, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:true, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Aurinko", language:"Finlandés", flag:"🇫🇮", meaning:"Sol", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:true, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:false, is_heavy:true, is_soft:false, is_round:true, is_shiny:true, is_colorful:true, is_cold:false, has_parts:false, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Hjärta", language:"Sueco", flag:"🇸🇪", meaning:"Corazón", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:true, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:true, is_man_made:false, is_tangible:true, is_heavy:false, is_soft:true, is_round:false, is_shiny:false, is_colorful:true, is_cold:false, has_parts:true, is_found_indoors:false, is_found_outdoors:false, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:true }},
+  { word:"Yama", language:"Japonés", flag:"🇯🇵", meaning:"Montaña", meta:{ is_animal:false, is_food:false, is_object:false, is_body_part:false, is_place:true, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:true, is_alive:false, is_man_made:false, is_tangible:true, is_heavy:true, is_soft:false, is_round:false, is_shiny:false, is_colorful:false, is_cold:true, has_parts:true, is_found_indoors:false, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:true, is_used_daily:false, can_be_bought:false, is_edible:false, is_dangerous:true, makes_sound:false, can_be_worn:false, is_bigger_than_person:true, fits_in_hand:false }},
+  { word:"Balalaika", language:"Ruso", flag:"🇷🇺", meaning:"Guitarra rusa", meta:{ is_animal:false, is_food:false, is_object:true, is_body_part:false, is_place:false, is_emotion:false, is_action:false, is_clothing:false, is_vehicle:false, is_plant:false, is_weather:false, is_profession:false, is_natural:false, is_alive:false, is_man_made:true, is_tangible:true, is_heavy:false, is_soft:false, is_round:true, is_shiny:true, is_colorful:false, is_cold:false, has_parts:true, is_found_indoors:true, is_found_outdoors:true, is_found_in_water:false, is_found_in_sky:false, is_used_daily:false, can_be_bought:true, is_edible:false, is_dangerous:false, makes_sound:true, can_be_worn:false, is_bigger_than_person:false, fits_in_hand:false }},
+];
+
 // ============================================================
 // CONSTANTS
 // ============================================================
@@ -91,7 +185,6 @@ interface GameState {
   won: boolean;
   startTime: number;
   puzzleNumber: number;
-  randomMode?: boolean;
 }
 
 // ============================================================
@@ -144,57 +237,152 @@ export default function GiskaGame() {
   const [guessState, setGuessState] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [showHelp, setShowHelp] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [questionRound, setQuestionRound] = useState(1);
   const [toast, setToast] = useState('');
 
   // God Mode state
   const [godMode, setGodMode] = useState(false);
-  const [godTab, setGodTab] = useState<'banco' | 'ia' | 'aleatorio'>('banco');
-  const [bankStats, setBankStats] = useState<Record<string, number>>({});
-  const [aiStats, setAiStats] = useState<Record<string, number>>({});
-  const [randomMode, setRandomMode] = useState(false);
+  const [godTab, setGodTab] = useState<'bank' | 'ai' | 'random'>('bank');
+  const [isRandomMode, setIsRandomMode] = useState(false);
+  const konamiRef = useRef<string[]>([]);
+  const logoTapRef = useRef(0);
+  const logoTapTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   const historyRef = useRef<HTMLDivElement>(null);
   const guessInputRef = useRef<HTMLInputElement>(null);
-  const logoTapCount = useRef(0);
-  const logoTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const allQuestionsRef = useRef<AskedQuestion[]>([]);
+  const [godBankStats, setGodBankStats] = useState<Record<string, number>>({});
+  const [godAIStats, setGodAIStats] = useState<Record<string, number>>({});
+  const [godStatsLoading, setGodStatsLoading] = useState(false);
 
   // ---- KONAMI CODE ----
   useEffect(() => {
-    const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-    let index = 0;
-
-    const onKey = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input/textarea
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-      if (key === konamiCode[index]) {
-        index++;
-        if (index === konamiCode.length) {
-          setGodMode(prev => !prev);
-          index = 0;
-        }
-      } else {
-        index = key === konamiCode[0] ? 1 : 0;
+    const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
+    const handler = (e: KeyboardEvent) => {
+      konamiRef.current.push(e.key);
+      if (konamiRef.current.length > KONAMI.length) konamiRef.current.shift();
+      if (konamiRef.current.length === KONAMI.length && konamiRef.current.every((k, i) => k === KONAMI[i])) {
+        konamiRef.current = [];
+        setGodMode(prev => {
+          if (!prev) loadGodStatsFromServer();
+          return !prev;
+        });
       }
     };
-
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // ---- FETCH GOD MODE STATS ----
-  useEffect(() => {
-    if (!godMode) return;
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(data => {
-        if (data.bankStats) setBankStats(data.bankStats);
-        if (data.aiStats) setAiStats(data.aiStats);
-      })
-      .catch(() => {});
-  }, [godMode]);
+  // ---- LOGO TAP (mobile alternative) ----
+  const handleLogoTap = useCallback(() => {
+    logoTapRef.current++;
+    if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
+    logoTapTimer.current = setTimeout(() => { logoTapRef.current = 0; }, 2000);
+    if (logoTapRef.current >= 7) {
+      logoTapRef.current = 0;
+      setGodMode(prev => {
+        if (!prev) loadGodStatsFromServer();
+        return !prev;
+      });
+    }
+  }, [loadGodStatsFromServer]);
+
+  // ---- SAVE GOD STATS ----
+  const saveGodStats = useCallback(async (questionId: string, isAI: boolean, text?: string) => {
+    try {
+      await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, isAI, text }),
+      });
+    } catch {}
+  }, []);
+
+  // ---- LOAD GOD STATS FROM SERVER ----
+  const loadGodStatsFromServer = useCallback(async () => {
+    setGodStatsLoading(true);
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      setGodBankStats(data.bankStats || {});
+      setGodAIStats(data.aiStats || {});
+    } catch {
+      setGodBankStats({});
+      setGodAIStats({});
+    } finally {
+      setGodStatsLoading(false);
+    }
+  }, []);
+
+  // ---- RANDOM WORD ----
+  const playRandomWord = useCallback(() => {
+    if (WORDS.length <= 1) return;
+    let idx: number;
+    do { idx = Math.floor(Math.random() * WORDS.length); } while (WORDS[idx] === dailyWord);
+    const word = WORDS[idx];
+    setDailyWord(word);
+    setQuestionsAsked([]);
+    setGuessAttempts([]);
+    setCompleted(false);
+    setWon(false);
+    setStartTime(Date.now());
+    setElapsed(0);
+    setGuessInput('');
+    setGuessState('idle');
+    setExpandedCategory(null);
+    setAiQuestion('');
+    setAiError('');
+    setShowResults(false);
+    setIsRandomMode(true);
+    setGodMode(false);
+    showToast('🎲 Palabra aleatoria: ' + word.word);
+  }, [dailyWord]);
+
+  // ---- BACK TO DAILY ----
+  const backToDaily = useCallback(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days = Math.floor((today.getTime() - GAME_START.getTime()) / (1000 * 60 * 60 * 24));
+    const idx = ((days % WORDS.length) + WORDS.length) % WORDS.length;
+    const word = WORDS[idx];
+    setDailyWord(word);
+    setQuestionsAsked([]);
+    setGuessAttempts([]);
+    setCompleted(false);
+    setWon(false);
+    setStartTime(Date.now());
+    setElapsed(0);
+    setGuessInput('');
+    setGuessState('idle');
+    setExpandedCategory(null);
+    setAiQuestion('');
+    setAiError('');
+    setShowResults(false);
+    setIsRandomMode(false);
+    showToast('📅 Modo diario restaurado');
+  }, []);
+
+  // ---- TOTAL QUESTION COUNT (all rounds) ----
+  const totalQuestionsAsked = allQuestionsRef.current.length + questionsAsked.length;
+
+  // ---- HANDLE CONTINUE (new round after 20 questions) ----
+  const handleContinue = useCallback(() => {
+    allQuestionsRef.current = [...allQuestionsRef.current, ...questionsAsked];
+    setQuestionsAsked([]);
+    setQuestionRound(prev => prev + 1);
+    setShowLimitModal(false);
+    showToast('🔄 Ronda ' + (questionRound + 1) + ' — ¡Sigue preguntando!');
+  }, [questionsAsked, questionRound]);
+
+  // ---- HANDLE SEE ANSWER ----
+  const handleSeeAnswer = useCallback(() => {
+    allQuestionsRef.current = [...allQuestionsRef.current, ...questionsAsked];
+    setShowLimitModal(false);
+    setCompleted(true);
+    setWon(false);
+    setTimeout(() => setShowResults(true), 500);
+  }, [questionsAsked]);
 
   // ---- INIT ----
   useEffect(() => {
@@ -219,7 +407,6 @@ export default function GiskaGame() {
           setCompleted(s.completed || false);
           setWon(s.won || false);
           setStartTime(s.startTime || Date.now());
-          if (s.randomMode) setRandomMode(true);
           if (s.completed) {
             setTimeout(() => setShowResults(true), 300);
           }
@@ -246,29 +433,16 @@ export default function GiskaGame() {
 
   // ---- SAVE ----
   const saveState = useCallback(() => {
-    if (!dailyWord) return;
-    const key = randomMode ? 'giska_random' : `giska_${puzzleNumber}`;
     try {
-      localStorage.setItem(key, JSON.stringify({
-        questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber, randomMode
+      localStorage.setItem(`giska_${puzzleNumber}`, JSON.stringify({
+        questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber
       } as GameState));
     } catch {}
-  }, [questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber, dailyWord, randomMode]);
-
-  // ---- SAVE GOD STATS ----
-  const saveGodStats = useCallback(async (type: 'bank' | 'ai', questionId: string, questionText: string) => {
-    try {
-      await fetch('/api/stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, questionId, questionText }),
-      });
-    } catch {}
-  }, []);
+  }, [questionsAsked, guessAttempts, completed, won, startTime, puzzleNumber]);
 
   // ---- GAME LOGIC ----
   const askQuestion = useCallback((questionId: string) => {
-    if (completed || questionsAsked.length >= MAX_QUESTIONS) return;
+    if (completed || questionsAsked.length >= MAX_QUESTIONS || showLimitModal) return;
     if (questionsAsked.some(q => q.questionId === questionId)) return;
     if (!dailyWord) return;
 
@@ -278,15 +452,12 @@ export default function GiskaGame() {
     const answer = !!dailyWord.meta[q.property];
     const newAsked = [...questionsAsked, { questionId, answer }];
     setQuestionsAsked(newAsked);
-
-    saveGodStats('bank', questionId, q.text);
+    saveGodStats(questionId, false);
 
     if (newAsked.length >= MAX_QUESTIONS) {
-      setCompleted(true);
-      setWon(false);
-      setTimeout(() => setShowResults(true), 500);
+      setShowLimitModal(true);
     }
-  }, [completed, questionsAsked, dailyWord, saveGodStats]);
+  }, [completed, questionsAsked, dailyWord]);
 
   // After state updates, save
   useEffect(() => {
@@ -325,7 +496,7 @@ export default function GiskaGame() {
   // ---- AI QUESTION ----
   const handleAIQuestion = useCallback(async () => {
     const question = aiQuestion.trim();
-    if (!question || aiLoading || completed || !dailyWord) return;
+    if (!question || aiLoading || completed || !dailyWord || showLimitModal) return;
     if (questionsAsked.length >= MAX_QUESTIONS) return;
 
     setAiLoading(true);
@@ -345,13 +516,14 @@ export default function GiskaGame() {
           meaning: dailyWord.meaning,
           word: dailyWord.word,
           language: dailyWord.language,
-          previousQuestions: prevQs,
           meta: dailyWord.meta,
+          previousQuestions: prevQs,
         }),
       });
 
       const data = await res.json();
 
+      // Show specific messages for limit / no api key
       if (data.noApiKey) {
         setAiError('⚠️ La IA no está configurada. Usa las preguntas predefinidas.');
         setAiLoading(false);
@@ -377,68 +549,31 @@ export default function GiskaGame() {
       }];
       setQuestionsAsked(newAsked);
       setAiQuestion('');
-
-      saveGodStats('ai', `ai_${Date.now()}`, question);
+      saveGodStats(`ai_${Date.now()}`, true, question);
 
       if (newAsked.length >= MAX_QUESTIONS) {
-        setCompleted(true);
-        setWon(false);
-        setTimeout(() => setShowResults(true), 500);
+        setShowLimitModal(true);
       }
     } catch {
       setAiError('Error de conexión. Inténtalo de nuevo.');
     } finally {
       setAiLoading(false);
     }
-  }, [aiQuestion, aiLoading, completed, dailyWord, questionsAsked, saveGodStats]);
-
-  // ---- RANDOM WORD ----
-  const playRandomWord = useCallback(() => {
-    const idx = Math.floor(Math.random() * WORDS.length);
-    const word = WORDS[idx];
-    setDailyWord(word);
-    setQuestionsAsked([]);
-    setGuessAttempts([]);
-    setCompleted(false);
-    setWon(false);
-    setStartTime(Date.now());
-    setElapsed(0);
-    setExpandedCategory(null);
-    setAiQuestion('');
-    setAiError('');
-    setGuessInput('');
-    setRandomMode(true);
-    setShowResults(false);
-    setGodMode(false);
-    // Clear random save
-    localStorage.removeItem('giska_random');
-    showToast('🎲 Palabra aleatoria cargada');
-  }, []);
-
-  // ---- LOGO TAP (mobile God Mode) ----
-  const handleLogoTap = useCallback(() => {
-    logoTapCount.current++;
-    if (logoTapCount.current >= 7) {
-      logoTapCount.current = 0;
-      if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
-      setGodMode(prev => !prev);
-    } else {
-      if (logoTapTimer.current) clearTimeout(logoTapTimer.current);
-      logoTapTimer.current = setTimeout(() => { logoTapCount.current = 0; }, 3000);
-    }
-  }, []);
+  }, [aiQuestion, aiLoading, completed, dailyWord, questionsAsked]);
 
   // ---- SHARE ----
   const handleShare = useCallback(() => {
     if (!dailyWord) return;
-    const stars = getStars(won, questionsAsked.length);
+    const totalCount = allQuestionsRef.current.length + questionsAsked.length;
+    const stars = getStars(won, totalCount);
     const status = won ? '🏆 ¡Adivinado!' : '❌ No adivinado';
     let text = `GISKA #${puzzleNumber} ${stars}\n`;
     text += `${status}\n`;
-    text += `Preguntas: ${questionsAsked.length}/${MAX_QUESTIONS}`;
+    text += `Preguntas: ${totalCount}/${questionRound > 1 ? MAX_QUESTIONS * questionRound + ' (ronda ' + questionRound + ')' : MAX_QUESTIONS}`;
     if (!won) text += ` | Intentos: ${guessAttempts.length}/${MAX_GUESSES}`;
     text += '\n';
-    const icons = questionsAsked.map(q => {
+    const allQs = [...allQuestionsRef.current, ...questionsAsked];
+    const icons = allQs.map(q => {
       const question = QUESTIONS.find(x => x.id === q.questionId);
       return `${question?.icon || '🤖'}${q.answer ? '✅' : '❌'}`;
     });
@@ -452,7 +587,7 @@ export default function GiskaGame() {
     }).catch(() => {
       showToast('¡Resultado copiado! 📋');
     });
-  }, [dailyWord, won, questionsAsked, guessAttempts, puzzleNumber]);
+  }, [dailyWord, won, questionsAsked, guessAttempts, puzzleNumber, questionRound]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -529,7 +664,7 @@ export default function GiskaGame() {
 
   const questionsLeft = MAX_QUESTIONS - questionsAsked.length;
   const guessesLeft = MAX_GUESSES - guessAttempts.length;
-  const stars = getStars(won, questionsAsked.length);
+  const stars = getStars(won, totalQuestionsAsked);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -537,29 +672,15 @@ export default function GiskaGame() {
       <header className="glass-header sticky top-0 z-40 border-b border-[var(--border)]">
         <div className="max-w-[672px] mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h1
-              onClick={handleLogoTap}
-              className="text-2xl font-black tracking-tight cursor-pointer select-none"
-              style={{ fontFamily: 'var(--font-space-grotesk)' }}
-            >
+            <h1 className="text-2xl font-black tracking-tight select-none" style={{ fontFamily: 'var(--font-space-grotesk)' }} onClick={handleLogoTap}>
               <span className="text-[var(--primary)]">GIS</span>
               <span className="text-[var(--ring)]">KA</span>
             </h1>
             <span className="text-[0.7rem] font-mono bg-[var(--muted)] text-[var(--foreground)] px-2 py-0.5 rounded-full border border-[var(--border)]">
-              #{puzzleNumber}
+              {isRandomMode ? '🎲 Aleatorio' : `#${puzzleNumber}`}
             </span>
-            {randomMode && (
-              <span className="text-[0.6rem] font-semibold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/30">
-                🎲 Aleatorio
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-2">
-            {godMode && (
-              <span className="text-xs font-semibold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/30">
-                ⚡ Dios
-              </span>
-            )}
             <div className="flex items-center gap-1 text-[var(--muted-foreground)] font-mono text-sm">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               <span>{formatTime(elapsed)}</span>
@@ -607,7 +728,15 @@ export default function GiskaGame() {
         {/* PROGRESS */}
         <div className="flex flex-col gap-2">
           <div className="flex justify-between text-sm text-[var(--muted-foreground)]">
-            <span>Preguntas: <strong className="text-[var(--foreground)]">{questionsAsked.length}</strong>/{MAX_QUESTIONS}</span>
+            <span className="flex items-center gap-2">
+              Preguntas: <strong className="text-[var(--foreground)]">{totalQuestionsAsked}</strong>
+              {questionRound > 1 && (
+                <span className="text-[0.65rem] font-bold bg-[var(--ring)]/20 text-[var(--ring)] px-1.5 py-0.5 rounded-full">
+                  R{questionRound}
+                </span>
+              )}
+              /{MAX_QUESTIONS}
+            </span>
             <span>Intentos: <strong className="text-[var(--foreground)]">{guessAttempts.length}</strong>/{MAX_GUESSES}</span>
           </div>
           <div className="h-2 bg-[var(--muted)] rounded-full overflow-hidden">
@@ -834,7 +963,19 @@ export default function GiskaGame() {
           </div>
         )}
 
-        {/* GAME OVER */}
+        {/* RANDOM MODE BANNER */}
+        {isRandomMode && !completed && (
+          <div className="flex items-center justify-between p-3 rounded-xl border-2 border-dashed border-[var(--ring)]/40 bg-[var(--accent)]/30">
+            <span className="text-sm text-[var(--muted-foreground)]">🎲 Modo aleatorio activo</span>
+            <button
+              onClick={backToDaily}
+              className="text-xs font-semibold px-3 py-1 rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 transition-opacity"
+            >
+              Volver al diario
+            </button>
+          </div>
+        )}
+
         {completed && (
           <div className="animate-fade-in flex flex-col gap-3">
             <div className="flex gap-3">
@@ -853,12 +994,7 @@ export default function GiskaGame() {
               </button>
             </div>
             <p className="text-center text-xs text-[var(--muted-foreground)]">
-              {!randomMode && 'Vuelve mañana para un nuevo puzzle 🌅'}
-              {randomMode && (
-                <button onClick={playRandomWord} className="underline hover:text-[var(--primary)] transition-colors">
-                  🎲 Jugar otra palabra aleatoria
-                </button>
-              )}
+              Vuelve mañana para un nuevo puzzle 🌅
             </p>
           </div>
         )}
@@ -936,7 +1072,7 @@ export default function GiskaGame() {
             <h2 className="text-center text-xl font-extrabold mb-1" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
               {won ? '🎉 ¡Enhorabuena!' : '😔 ¡Casi!'}
             </h2>
-            <p className="text-center text-sm text-[var(--muted-foreground)] mb-4">GISKA #{puzzleNumber}{randomMode ? ' (Aleatorio)' : ''}</p>
+            <p className="text-center text-sm text-[var(--muted-foreground)] mb-4">GISKA #{puzzleNumber}</p>
 
             <div className="bg-[var(--muted)] border-2 border-[var(--primary)]/20 rounded-xl p-4 text-center mb-4">
               <p className="text-sm text-[var(--muted-foreground)]">La palabra era</p>
@@ -947,8 +1083,8 @@ export default function GiskaGame() {
 
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="bg-[var(--muted)] rounded-lg p-3 text-center">
-                <span className="text-2xl font-extrabold block">{questionsAsked.length}</span>
-                <span className="text-xs text-[var(--muted-foreground)]">Preguntas</span>
+                <span className="text-2xl font-extrabold block">{totalQuestionsAsked}</span>
+                <span className="text-xs text-[var(--muted-foreground)]">Preguntas{questionRound > 1 ? ' (' + questionRound + 'R)' : ''}</span>
               </div>
               <div className="bg-[var(--muted)] rounded-lg p-3 text-center">
                 <span className="text-2xl font-extrabold block">{guessAttempts.length}</span>
@@ -962,7 +1098,7 @@ export default function GiskaGame() {
 
             {/* Timeline */}
             <div className="flex flex-wrap gap-1.5 justify-center mb-4">
-              {questionsAsked.map((q, i) => {
+              {[...allQuestionsRef.current, ...questionsAsked].map((q, i) => {
                 const question = QUESTIONS.find(x => x.id === q.questionId);
                 return (
                   <span
@@ -989,161 +1125,198 @@ export default function GiskaGame() {
             </button>
 
             <p className="text-center text-xs text-[var(--muted-foreground)]">
-              {!randomMode && '¡Vuelve mañana para un nuevo puzzle! 🌅'}
-              {randomMode && '🎲 Estás en modo aleatorio'}
+              ¡Vuelve mañana para un nuevo puzzle! 🌅
             </p>
           </div>
         </div>
       )}
 
-      {/* ============ GOD MODE PANEL ============ */}
+      {/* GOD MODE MODAL */}
       {godMode && (
-        <div className="fixed inset-0 z-[60] flex">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setGodMode(false)}
-          />
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 animate-fade-in"
+          onClick={e => { if (e.target === e.currentTarget) setGodMode(false); }}
+        >
+          <div className="bg-[var(--card)] rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto relative shadow-lg border border-[var(--ring)]/30">
+            <button
+              onClick={() => setGodMode(false)}
+              className="absolute top-3 right-3 text-xl text-[var(--muted-foreground)] hover:text-[var(--foreground)] leading-none p-1"
+            >
+              ×
+            </button>
 
-          {/* Panel */}
-          <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[var(--card)] border-l border-[var(--border)] shadow-2xl flex flex-col overflow-hidden">
-            {/* Header */}
-            <div className="p-4 border-b border-[var(--border)] flex items-center justify-between bg-gradient-to-r from-purple-900/20 to-transparent shrink-0">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                ⚡ Modo Dios
-              </h2>
-              <button
-                onClick={() => setGodMode(false)}
-                className="p-2 rounded-lg hover:bg-[var(--muted)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors text-lg leading-none"
-              >
-                ✕
-              </button>
-            </div>
+            <h2 className="text-center text-xl font-extrabold mb-1" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+              ⚡ Modo Dios
+            </h2>
+            <p className="text-center text-xs text-[var(--muted-foreground)] mb-4">Estadísticas y herramientas de administración</p>
 
             {/* Tabs */}
-            <div className="flex border-b border-[var(--border)] shrink-0">
-              {(['banco', 'ia', 'aleatorio'] as const).map(tab => (
+            <div className="flex gap-1 mb-4 bg-[var(--muted)] rounded-lg p-1">
+              {([['bank', '📊 Banco'], ['ai', '🤖 IA'], ['random', '🎲 Aleatorio']] as const).map(([tab, label]) => (
                 <button
                   key={tab}
                   onClick={() => setGodTab(tab)}
-                  className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                  className={`flex-1 text-xs font-semibold py-2 px-3 rounded-md transition-all ${
                     godTab === tab
-                      ? 'border-b-2 border-[var(--primary)] text-[var(--primary)] bg-[var(--accent)]'
-                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/50'
+                      ? 'bg-[var(--primary)] text-[var(--primary-foreground)] shadow-sm'
+                      : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
                   }`}
                 >
-                  {tab === 'banco' && '🏦 Banco'}
-                  {tab === 'ia' && '🤖 IA'}
-                  {tab === 'aleatorio' && '🎲 Aleatorio'}
+                  {label}
                 </button>
               ))}
             </div>
 
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {godTab === 'banco' && (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Preguntas del banco más usadas por todos los jugadores
+            {/* BANK TAB */}
+            {godTab === 'bank' && (
+              <div className="animate-fade-in">
+                <h3 className="text-sm font-semibold mb-3">Preguntas del banco más usadas (todas las partidas)</h3>
+                {Object.keys(godBankStats).length === 0 ? (
+                  <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
+                    {godStatsLoading ? 'Cargando...' : 'No hay estadísticas aún. Juega algunas partidas primero.'}
                   </p>
-                  {Object.entries(bankStats)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 20)
-                    .map(([id, count], i) => {
-                      const q = QUESTIONS.find(x => x.id === id);
-                      return (
-                        <div
-                          key={id}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]"
-                        >
-                          <span className="text-xs font-mono text-[var(--muted-foreground)] w-6 text-right">{i + 1}.</span>
-                          <span className="text-lg">{q?.icon || '❓'}</span>
-                          <span className="flex-1 text-sm">{q?.text || id}</span>
-                          <span className="font-bold text-sm text-[var(--primary)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
-                            {count}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  {Object.keys(bankStats).length === 0 && (
-                    <div className="text-center py-8 text-[var(--muted-foreground)]">
-                      <p className="text-3xl mb-2">📭</p>
-                      <p className="text-sm">No hay datos todavía.</p>
-                      <p className="text-xs mt-1">Los datos aparecerán cuando los jugadores hagan preguntas.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {godTab === 'ia' && (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-[var(--muted-foreground)]">
-                    Preguntas más hechas a la IA por todos los jugadores
-                  </p>
-                  {Object.entries(aiStats)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 20)
-                    .map(([text, count], i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]"
-                      >
-                        <span className="text-xs font-mono text-[var(--muted-foreground)] w-6 text-right">{i + 1}.</span>
-                        <span className="text-lg">🤖</span>
-                        <span className="flex-1 text-sm">{text}</span>
-                        <span className="font-bold text-sm text-[var(--primary)] bg-[var(--accent)] px-2 py-0.5 rounded-full">
-                          {count}
-                        </span>
-                      </div>
-                    ))}
-                  {Object.keys(aiStats).length === 0 && (
-                    <div className="text-center py-8 text-[var(--muted-foreground)]">
-                      <p className="text-3xl mb-2">📭</p>
-                      <p className="text-sm">No hay datos todavía.</p>
-                      <p className="text-xs mt-1">Los datos aparecerán cuando los jugadores pregunten a la IA.</p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {godTab === 'aleatorio' && (
-                <div className="flex flex-col gap-4">
-                  <div className="text-center">
-                    <p className="text-3xl mb-3">🎲</p>
-                    <p className="text-sm text-[var(--muted-foreground)] mb-1">
-                      Juega con una palabra aleatoria
-                    </p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      {WORDS.length} palabras disponibles en la base de datos
-                    </p>
+                ) : (
+                  <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto history-scroll">
+                    {Object.entries(godBankStats)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([qId, count]) => {
+                        const q = QUESTIONS.find(x => x.id === qId);
+                        if (!q) return null;
+                        const maxCount = Math.max(...Object.values(godBankStats));
+                        const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                        return (
+                          <div key={qId} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--muted)]">
+                            <span className="text-lg">{q.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs truncate">{q.text}</span>
+                                <span className="text-xs font-bold ml-2 whitespace-nowrap">{count}x</span>
+                              </div>
+                              <div className="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+                                <div className="h-full rounded-full bg-[var(--ring)] transition-all" style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
+                )}
+              </div>
+            )}
 
+            {/* AI TAB */}
+            {godTab === 'ai' && (
+              <div className="animate-fade-in">
+                <h3 className="text-sm font-semibold mb-3">Preguntas más hechas a la IA (simplificadas)</h3>
+                {Object.keys(godAIStats).length === 0 ? (
+                  <p className="text-xs text-[var(--muted-foreground)] text-center py-6">
+                    {godStatsLoading ? 'Cargando...' : 'No hay preguntas a la IA registradas aún.'}
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto history-scroll">
+                    {Object.entries(godAIStats)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([text, count]) => {
+                        const maxCount = Math.max(...Object.values(godAIStats));
+                        const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                        return (
+                          <div key={text} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--muted)]">
+                            <span className="text-lg">🤖</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs truncate">{text}</span>
+                                <span className="text-xs font-bold ml-2 whitespace-nowrap">{count}x</span>
+                              </div>
+                              <div className="h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
+                                <div className="h-full rounded-full bg-[var(--primary)] transition-all" style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* RANDOM TAB */}
+            {godTab === 'random' && (
+              <div className="animate-fade-in flex flex-col gap-4">
+                <h3 className="text-sm font-semibold">Jugar con una palabra aleatoria</h3>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Selecciona una palabra al azar del banco completo ({WORDS.length} palabras disponibles).
+                  Esto no afecta a la palabra diaria ni a tu racha.
+                </p>
+                <button
+                  onClick={playRandomWord}
+                  className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-bold transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+                >
+                  🎲 Jugar palabra aleatoria
+                </button>
+                {isRandomMode && (
                   <button
-                    onClick={playRandomWord}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] font-bold text-base transition-opacity hover:opacity-90 shadow-lg"
+                    onClick={backToDaily}
+                    className="w-full py-3 rounded-xl border border-[var(--border)] text-[var(--foreground)] text-sm font-semibold transition-colors hover:bg-[var(--muted)] flex items-center justify-center gap-2"
                   >
-                    🎲 Jugar palabra aleatoria
+                    📅 Volver al modo diario
                   </button>
-
-                  {randomMode && (
-                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
-                      <p className="text-sm font-semibold text-amber-400">
-                        🎲 Estás en modo aleatorio
-                      </p>
-                      <p className="text-xs text-[var(--muted-foreground)] mt-1">
-                        La palabra actual no es la del día. Tu partida no se guardará como resultado oficial.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="mt-2 p-3 rounded-lg bg-[var(--muted)]/50 border border-[var(--border)]">
-                    <p className="text-xs text-[var(--muted-foreground)] text-center">
-                      💡 <strong>Consejo:</strong> Usa el modo aleatorio para probar el juego y ajustar las preguntas antes de que juegue el público.
-                    </p>
-                  </div>
+                )}
+                <div className="h-px bg-[var(--border)]" />
+                <div className="text-center">
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    Total de palabras en el banco: <strong className="text-[var(--foreground)]">{WORDS.length}</strong>
+                  </p>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                    Total de preguntas del banco: <strong className="text-[var(--foreground)]">{QUESTIONS.length}</strong>
+                  </p>
                 </div>
-              )}
+              </div>
+            )}
+
+            <div className="h-px bg-[var(--border)] my-4" />
+            <p className="text-center text-[0.625rem] text-[var(--muted-foreground)]">
+              Acceso: Código Konami (↑↑↓↓←→←→BA)
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* LIMIT MODAL */}
+      {showLimitModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 animate-fade-in"
+          onClick={e => { if (e.target === e.currentTarget) return; }}
+        >
+          <div className="bg-[var(--card)] rounded-2xl p-6 max-w-sm w-full relative shadow-lg text-center">
+            <div className="text-4xl mb-3">🤔</div>
+            <h2 className="text-lg font-extrabold mb-1" style={{ fontFamily: 'var(--font-space-grotesk)' }}>
+              Has usado tus {MAX_QUESTIONS} preguntas
+            </h2>
+            <p className="text-sm text-[var(--muted-foreground)] mb-5">
+              {questionRound === 1
+                ? 'Puedes pedir 20 preguntas más si crees que necesitas más pistas.'
+                : 'Llevas ' + totalQuestionsAsked + ' preguntas en ' + questionRound + ' rondas. ¿Quieres seguir?'
+              }
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleContinue}
+                className="w-full py-3 rounded-xl bg-[var(--primary)] text-[var(--primary-foreground)] text-sm font-bold transition-opacity hover:opacity-90 flex items-center justify-center gap-2"
+              >
+                🔄 Continuar jugando
+              </button>
+              <button
+                onClick={handleSeeAnswer}
+                className="w-full py-3 rounded-xl border border-[var(--border)] text-[var(--foreground)] text-sm font-semibold transition-colors hover:bg-[var(--muted)] flex items-center justify-center gap-2"
+              >
+                👁️ Ver la respuesta
+              </button>
             </div>
+            {questionRound > 1 && (
+              <p className="text-xs text-[var(--muted-foreground)] mt-3">
+                Total: {totalQuestionsAsked} preguntas
+              </p>
+            )}
           </div>
         </div>
       )}
