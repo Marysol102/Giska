@@ -255,7 +255,33 @@ export default function GiskaGame() {
   const [godBankStats, setGodBankStats] = useState<Record<string, number>>({});
   const [godAIStats, setGodAIStats] = useState<Record<string, number>>({});
   const [godStatsLoading, setGodStatsLoading] = useState(false);
+  
+ // ---- SAVE GOD STATS ----
+  const saveGodStats = useCallback(async (questionId: string, isAI: boolean, text?: string) => {
+    try {
+      await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId, isAI, text }),
+      });
+    } catch {}
+  }, []);
 
+  // ---- LOAD GOD STATS FROM SERVER ----
+  const loadGodStatsFromServer = useCallback(async () => {
+    setGodStatsLoading(true);
+    try {
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      setGodBankStats(data.bankStats || {});
+      setGodAIStats(data.aiStats || {});
+    } catch {
+      setGodBankStats({});
+      setGodAIStats({});
+    } finally {
+      setGodStatsLoading(false);
+    }
+  }, []);
   // ---- KONAMI CODE ----
   useEffect(() => {
     const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','KeyB','KeyA'];
@@ -287,33 +313,6 @@ export default function GiskaGame() {
       });
     }
   }, [loadGodStatsFromServer]);
-
-  // ---- SAVE GOD STATS ----
-  const saveGodStats = useCallback(async (questionId: string, isAI: boolean, text?: string) => {
-    try {
-      await fetch('/api/stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questionId, isAI, text }),
-      });
-    } catch {}
-  }, []);
-
-  // ---- LOAD GOD STATS FROM SERVER ----
-  const loadGodStatsFromServer = useCallback(async () => {
-    setGodStatsLoading(true);
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      setGodBankStats(data.bankStats || {});
-      setGodAIStats(data.aiStats || {});
-    } catch {
-      setGodBankStats({});
-      setGodAIStats({});
-    } finally {
-      setGodStatsLoading(false);
-    }
-  }, []);
 
   // ---- RANDOM WORD ----
   const playRandomWord = useCallback(() => {
