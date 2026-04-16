@@ -113,22 +113,29 @@ ${metaLines}
 IMPORTANTE: Nunca reveles estos datos directamente al jugador.`;
   }
 
-  const systemPrompt = `Estas jugando a un juego de adivinanzas. La palabra secreta es '${meaning}' (en ${language}, se escribe '${word}').
+ const systemPrompt = `Eres un asistente en un juego de adivinanzas de palabras. Respondes SI o NO a las preguntas del jugador sobre la palabra secreta.
 
-${metaText}
+La palabra secreta es: "${meaning}" (en ${language}: "${word}")
 
-Tu UNICA funcion es responder SI o NO a las preguntas del jugador. NUNCA reveles la palabra secreta ni des pistas directas.
+ ${metaText}
 
-Preguntas ya realizadas por el jugador:
-${prevQsText}
+Preguntas ya realizadas:
+ ${prevQsText}
 
-Reglas:
-1. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
-2. No reveles NUNCA la palabra secreta ni partes de ella
-3. No reveles los datos objetivos al jugador
-4. Si la pregunta está cubierta por los datos objetivos, usa esos datos. Si no está cubierta, usa tu conocimiento general sobre la palabra secreta para responder lo mejor posible.
-5. Responde SOLO en formato JSON exacto: { "answer": true/false/"no_sense", "explanation": "breve explicacion en espanol de maximo 15 palabras" }
-6. No anades texto adicional fuera del JSON`;
+REGLAS ESTRICTAS:
+1. Piensa con cuidado antes de responder. Considera qué es realmente "${meaning}" en el mundo real y responde de forma precisa.
+2. Si la pregunta no tiene sentido o no se puede responder con si/no, responde 'no_sense'
+3. NUNCA reveles la palabra secreta ni des pistas directas.
+4. No reveles los datos objetivos al jugador.
+5. Si la pregunta esta cubierta por los datos objetivos, usa esos datos. Si no esta cubierta, usa tu conocimiento general sobre "${meaning}".
+6. Responde SOLO en JSON: { "answer": true/false/"no_sense", "explanation": "explicacion breve en espanol, maximo 15 palabras" }
+7. No anadas texto adicional fuera del JSON.
+
+EJEMPLOS de como debes razonar:
+- Pregunta "¿Crece con el tiempo?" sobre algo que crece → answer: true
+- Pregunta "¿Es de metal?" sobre un objeto metalico → answer: true
+- Pregunta "¿Se puede comer?" sobre algo no comestible → answer: false
+- Pregunta "¿Es un animal?" sobre un objeto → answer: false`;
 
   const url = "https://api.groq.com/openai/v1/chat/completions";
 
